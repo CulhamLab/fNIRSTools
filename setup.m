@@ -1,5 +1,7 @@
 function setup
+
 %% Check Requirements
+
 fprintf('Checking requirements...');
 all_requirements = true;
 if ~exist('neuroelf', 'file')
@@ -10,17 +12,17 @@ if all_requirements
     fprintf('success\n');
 end
 
-% %add directory to path
+%% Add to Path
+
 fprintf('Adding directories to path...');
 path_to_collection = [pwd filesep 'AddToPath' filesep];
 path(path,path_to_collection);
-%save path
 try
     savepath
+    fprintf('success\n');
 catch
     warning('MATLAB Path could not be saved. Directories have been added to the path for this session only.\nThe most common solution is to run MATLAB as admin and try agian.')
 end
-fprintf('success\n');
 
 %% Done
 disp('Setup complete!')
