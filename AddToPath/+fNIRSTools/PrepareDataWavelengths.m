@@ -310,6 +310,18 @@ fclose(fid_out);
 
 %% .wl# data files
 
+fprintf('\t\tDeleting prior wl# data files in output directory:\n');
+list = dir([directory_destination '*.wl*']);
+number_prior_files = length(list);
+if number_prior_files
+    for i = 1:number_prior_files
+        fprintf('\t\t\tDeleting %d of %d: %s\n', i, number_prior_files, list(i).name);
+        delete([directory_destination list(i).name]);
+    end
+else
+    fprintf('\t\t\tNo prior .wl# files were found\n');
+end
+
 fprintf('\t\tCopying (and renaming) wl# data files:\n');
 for w = 1:number_wavelengths
     fprintf('\t\t\tFile %d of %d: %dnm (index %d):\n', w, number_wavelengths, p.WAVELENGTHS_USE(w), wavelength_index(w));
