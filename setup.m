@@ -1,10 +1,14 @@
 function setup
 %% Check Requirements
 fprintf('Checking requirements...');
+all_requirements = true;
 if ~exist('neuroelf', 'file')
-    error('This package requires the NeuroElf toolbox for reading and writing fMRI file formats.')
+    warning('Some functions in this package require the NeuroElf toolbox for reading and writing fMRI file formats, but this NeuroElf does not appear to be installed. Some functions will not work without NeuroElf.')
+    all_requirements = false;
 end
-fprintf('success\n');
+if all_requirements
+    fprintf('success\n');
+end
 
 % %add directory to path
 fprintf('Adding directories to path...');
