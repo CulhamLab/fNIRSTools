@@ -3,12 +3,11 @@ function setup
 %% Check Requirements
 
 fprintf('Checking requirements...');
-all_requirements = true;
-if ~exist('neuroelf', 'file')
-    warning('Some functions in this package require the NeuroElf toolbox for reading and writing fMRI file formats, but this NeuroElf does not appear to be installed. Some functions will not work without NeuroElf.')
-    all_requirements = false;
-end
-if all_requirements
+[~,version_date] = version;
+version_year = str2num(version_date(end-3:end));
+if version_year < 2012
+    error('MATLAB 2012 or later is required')
+else
     fprintf('success\n');
 end
 
