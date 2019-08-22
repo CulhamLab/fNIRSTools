@@ -124,13 +124,13 @@ fprintf('\nComplete.\n');
 
 %% Process Dataset
 
-function ProcessDataset(p, directory_search, directory_output)
+function ProcessDataset(p, directory_source, directory_destination)
 
 %% Prep
 
 %create output dir
 fprintf('\tCreating output directory...');
-MkDir(directory_output);
+MkDir(directory_destination);
 fprintf('done\n');
 
 %files to exclude from final copy
@@ -142,7 +142,7 @@ fprintf('\t\tCopying config file with modifications:\n');
 
 %find file
 fprintf('\t\t\tFinding config file...');
-file = dir([directory_search '*_config.txt']);
+file = dir([directory_source '*_config.txt']);
 if isempty(file)
     error('No config file found')
 elseif length(file) > 1
@@ -154,13 +154,13 @@ fprintf('%s\n', file.name);
 filename_exclude{end+1} = file.name;
 
 %check overwrite
-if exist([directory_output file.name], 'file') && ~p.OVERWRITE
+if exist([directory_destination file.name], 'file') && ~p.OVERWRITE
     error('Config file already exists but overwrite is disabled')
 end
 
 %copy/modify
-fid_in = fopen([directory_search file.name], 'r');
-fid_out = fopen([directory_output file.name], 'w');
+fid_in = fopen([directory_source file.name], 'r');
+fid_out = fopen([directory_destination file.name], 'w');
 
 while ~feof(fid_in)
     line = fgetl(fid_in);
@@ -204,7 +204,7 @@ fprintf('\t\tCopying header file with modifications:\n');
 
 %find file
 fprintf('\t\t\tFinding config file...');
-file = dir([directory_search '*.hdr']);
+file = dir([directory_source '*.hdr']);
 if isempty(file)
     error('No header file found')
 elseif length(file) > 1
@@ -216,13 +216,13 @@ fprintf('%s\n', file.name);
 filename_exclude{end+1} = file.name;
 
 %check overwrite
-if exist([directory_output file.name], 'file') && ~p.OVERWRITE
+if exist([directory_destination file.name], 'file') && ~p.OVERWRITE
     error('Config file already exists but overwrite is disabled')
 end
 
 %copy/modify
-fid_in = fopen([directory_search file.name], 'r');
-fid_out = fopen([directory_output file.name], 'w');
+fid_in = fopen([directory_source file.name], 'r');
+fid_out = fopen([directory_destination file.name], 'w');
 
 multiline_mode_active = false;
 multiline_mode = [];
@@ -310,13 +310,25 @@ fclose(fid_out);
 
 %% .wl# data files
 
+fprintf('\t\tDeleting prior wl# data files in output directory:\n');
+list = dir([directory_destination '*.wl*']);
+number_prior_files = length(list);
+if number_prior_files
+    for i = 1:number_prior_files
+        fprintf('\t\t\tDeleting %d of %d: %s\n', i, number_prior_files, list(i).name);
+        delete([directory_destination list(i).name]);
+    end
+else
+    fprintf('\t\t\tNo prior .wl# files were found\n');
+end
+
 fprintf('\t\tCopying (and renaming) wl# data files:\n');
 for w = 1:number_wavelengths
     fprintf('\t\t\tFile %d of %d: %dnm (index %d):\n', w, number_wavelengths, p.WAVELENGTHS_USE(w), wavelength_index(w));
     
     %find source file
     fprintf('\t\t\t\tFinding file...');
-    file = dir(sprintf('%s*.wl%d', directory_search, wavelength_index(w)));
+    file = dir(sprintf('%s*.wl%d', directory_source, wavelength_index(w)));
     if isempty(file)
         error('No file found')
     elseif length(file) > 1
@@ -327,8 +339,8 @@ for w = 1:number_wavelengths
     %copy to destination
     fprintf('\t\t\t\tCopying file...');
     filename_out = [file.name(1:find(file.name=='.',1,'last')) sprintf('wl%d', w)];
-    fp_source = [directory_search file.name];
-    fp_dest = [directory_output filename_out];
+    fp_source = [directory_source file.name];
+    fp_dest = [directory_destination filename_out];
     if exist(fp_dest, 'file') && ~p.OVERWRITE
         error('File already exists but overwrite is disabled')
     end
@@ -342,7 +354,7 @@ end
 fprintf('\t\tCopying all remaining files:\n');
 
 %find all files
-list = dir(directory_search);
+list = dir(directory_source);
 list = list(~[list.isdir]);
 filenames = {list.name};
 
@@ -358,8 +370,8 @@ for i = 1:number_files
     fn = filenames{i};
     fprintf('\t\t\tFile %d of %d: %s\n', i, number_files, fn);
     
-    fp_source = [directory_search fn];
-    fp_dest = [directory_output fn];
+    fp_source = [directory_source fn];
+    fp_dest = [directory_destination fn];
     
     if exist(fp_dest, 'file') && ~p.OVERWRITE
         error('File already exists but overwrite is disabled')
